@@ -1,12 +1,12 @@
 import { TestBed } from "@angular/core/testing";
-import { Orcamento } from "./orcamento";
+import { Auth } from "./auth";
 
-describe("Orcamento", () => {
-  let service: Orcamento;
+describe("Auth", () => {
+  let service: Auth;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Orcamento);
+    service = TestBed.inject(Auth);
   });
 
   it("should be created", () => {
