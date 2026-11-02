@@ -13,6 +13,8 @@
     transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
         flex-basis 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 20;
+    --meu-gradiente: radial-gradient(circle, rgba(255, 255, 255, 1) 20%, rgba(5,5,5) 65%);
+
 }
 
 :host(:hover) {
@@ -39,6 +41,7 @@
     justify-content: flex-start;
     align-items: center;
     margin-bottom: 18px;
+    background: var(--meu-gradiente);
 }
 
 /* Mantém a logo visível e sem ser esmagada quando o menu está fechado */
@@ -50,6 +53,7 @@
     flex: 0 0 44px;
     /* Impede que a logo encolha! */
     object-fit: contain;
+    
 }
 
 /* Marca construída com ícone/logo e texto */

@@ -6,14 +6,21 @@ import { Formulario } from './pages/formulario/formulario';
 import { Preview } from './pages/preview/preview';
 import { NotFound } from './pages/not-found/not-found';
 import { LadingPage } from './pages/lading-page/lading-page';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
+  // Rotas públicas
   { path: '', component: LadingPage },
   { path: 'login', component: Login },
-  { path: 'cadastro', component: Cadastro },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'orcamento', component: Formulario },
-  { path: 'orcamento/:id', component: Formulario },
-  { path: 'preview', component: Preview },
+
+  // Rotas protegidas (bloqueadas para quem não está logado)
+  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'orcamento', component: Formulario, canActivate: [authGuard] },
+  { path: 'orcamento/:id', component: Formulario, canActivate: [authGuard] },
+  { path: 'preview', component: Preview, canActivate: [authGuard] },
+  { path: 'cadastro', component: Cadastro, canActivate: [authGuard]  },
+
+
+  // Rota de erro / não encontrada
   { path: '**', component: NotFound },
 ];

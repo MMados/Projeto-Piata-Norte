@@ -1,3 +1,8 @@
+/* ==========================================================
+   Gestão de usuários - Marcenaria Piatã Norte
+   CSS de componente Angular: variáveis em :host
+   ========================================================== */
+
 :host {
   --red: #AD1F23;
   --black: #000000;
@@ -27,30 +32,9 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 
-.signup {
-  display: grid;
-  grid-template-columns: 5fr 7fr;      /* 600px / 840px em 1440px */
-  min-height: 100vh;
-}
-
-.signup__image { position: relative; min-height: 100%; background: #e4e8f0; }
-.signup__image img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.signup__panel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  background: var(--gray);
-}
-
-.signup__box { width: 100%; max-width: 440px; }
+/* ---------- Página ---------- */
+.page { padding: 77px 24px 78px; }
+.page__inner { width: 100%; max-width: 1146px; margin: 0 auto; }
 
 .back {
   display: inline-flex;
@@ -59,12 +43,11 @@ input:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
-  color: var(--black);
 }
 .back:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 h1 {
-  margin-top: 20px;
+  margin-top: 19px;
   font-family: var(--font-title);
   font-size: 36px;
   font-weight: 600;
@@ -72,17 +55,83 @@ h1 {
   letter-spacing: -0.01em;
   color: #111111;
 }
+.page__sub {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 22px;
+  color: #555a62;
+}
 
-.form { margin-top: 17px; }
+/* ---------- Cartões ---------- */
+.card {
+  background: var(--white);
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 6px 24px rgba(20, 30, 50, 0.06);
+}
+.card--list { margin-top: 17px; }
+.card--form { margin-top: 20px; }
+
+.card h2 {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  color: #111111;
+}
+.card__sub {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 20px;
+  color: #555a62;
+}
+
+/* ---------- Tabela ---------- */
+.table-wrap {
+  margin-top: 16px;
+  border: 1px solid #dfe3e8;
+  border-radius: 16px;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.table thead tr { background: var(--gray); }
+.table th {
+  height: 38px;
+  padding: 0 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3c4047;
+}
+.table td {
+  height: 45px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--black);
+  border-top: 1px solid #e3e6ea;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.table td:last-child { color: #3c4047; }
+.table th:first-child,
+.table td:first-child { width: 50.5%; }
+
+/* ---------- Formulário ---------- */
+.form { margin-top: 16px; }
 
 .form__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
-
-.form > .field,
-.form > .form__row { margin-bottom: 21px; }
+.form > .form__row { margin-bottom: 18px; }
 
 .field label {
   display: block;
@@ -92,7 +141,6 @@ h1 {
   line-height: 16px;
   color: var(--black);
 }
-
 .field input {
   display: block;
   width: 100%;
@@ -108,42 +156,14 @@ h1 {
 .field input::placeholder { color: #8c9199; }
 .field input:focus { border-color: var(--red); }
 
-.terms {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: -1px;
-  font-size: 13px;
-  line-height: 20px;
-  color: #555a62;
-  cursor: pointer;
-}
-.terms input {
-  appearance: none;
-  -webkit-appearance: none;
-  flex: none;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  border: 2px solid var(--black);
-  border-radius: 6px;
-  background: var(--white) center / 12px no-repeat;
-  cursor: pointer;
-}
-.terms input:checked {
-  border-color: var(--red);
-  background-color: var(--red);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l2.5 2.5L10 3.5' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
-.terms input:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
-
+/* ---------- Botão ---------- */
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 48px;
-  margin-top: 20px;
+  margin-top: 19px;
   border: 0;
   border-radius: 999px;
   background: var(--red);
@@ -154,39 +174,17 @@ h1 {
 }
 .btn:hover { background: #8f191d; }
 
-.signup__login {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 15px;
-  line-height: 22px;
-  color: #555a62;
-}
-.link {
-  font-weight: 700;
-  color: var(--red);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-}
-.link:hover { color: #8f191d; }
-
-.erro{
-  font-size: 12px;
-  color: red;
-}
-
 /* ==========================================================
    Responsivo
    ========================================================== */
 @media (max-width: 900px) {
-  .signup { grid-template-columns: 1fr; }
-  .signup__image { display: none; }
-  .signup__panel { padding: 40px 24px; }
+  .page { padding: 40px 16px 48px; }
   h1 { font-size: 30px; }
+  .card { padding: 22px 18px; border-radius: 24px; }
 }
 
-@media (max-width: 520px) {
-  .form__row { grid-template-columns: 1fr; gap: 21px; }
+@media (max-width: 640px) {
+  .form__row { grid-template-columns: 1fr; gap: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

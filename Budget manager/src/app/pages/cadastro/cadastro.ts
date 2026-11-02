@@ -1,66 +1,82 @@
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { Firestore, collection, collectionData, doc, setDoc } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
+interface UserDoc {
+  uid?: string;
+  nome: string;
+  email: string;
+}
 
 @Component({
   selector: 'app-cadastro',
-  imports: [ReactiveFormsModule, RouterLink],
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './cadastro.html',
   styleUrl: './cadastro.css'
 })
 export class Cadastro {
-  formularioCadastro = new FormGroup({
-    nome: new FormControl('', [
-      Validators.required
-    ]),
-    sobrenome: new FormControl('', [
-      Validators.required
-    ]),
-    email: new FormControl('', [
-      Validators.required,
-      Validators.email
-    ]),
-    senha: new FormControl('', [
-      Validators.required,
-      Validators.minLength(8)
-    ]),
-    confirmar: new FormControl('', [
-      Validators.required
-    ]),
+  private auth = inject(Auth);
+  private firestore = inject(Firestore);
 
-    termos: new FormControl(false, [
-      Validators.requiredTrue
-    ]) 
+  users$: Observable<UserDoc[]> = collectionData(
+    collection(this.firestore, 'users'),
+    { idField: 'uid' }
+  ) as Observable<UserDoc[]>;
 
-  });
+  // Variáveis do formulário
+  nome: string = '';
+  email: string = '';
+  senha: string = '';
+  mostrarSenha: boolean = false; // Controlo de visibilidade da senha
 
-  mensagemSucesso='';
+  carregando: boolean = false;
+  mensagemErro: string = '';
+  mensagemSucesso: string = '';
 
-  validarCadastro(){
-    console.log('foi executado');
-    this.formularioCadastro.markAllAsTouched();
+  async cadastrarUsuario(): Promise<void> {
+    this.carregando = true;
+    this.mensagemErro = '';
+    this.mensagemSucesso = '';
 
-    const senha= this.formularioCadastro.get('senha')?.value;
-    const confirmarControle = this.formularioCadastro.get('confirmar');
-    const confirmar= confirmarControle?.value;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        this.auth,
+        this.email,
+        this.senha
+      );
 
-    if(senha && confirmar && senha !== confirmar) {
-      confirmarControle?.setErrors({
-        ...confirmarControle.errors,
-        senhaDiferente: true
+      const uid = userCredential.user.uid;
+
+      const userRef = doc(this.firestore, `users/${uid}`);
+      await setDoc(userRef, {
+        uid: uid,
+        nome: this.nome,
+        email: this.email,
+        criadoEm: new Date()
       });
-      this.mensagemSucesso='';
-      return;
-    }
 
-    if (confirmarControle?.hasError('senhaDiferente')){
-      confirmarControle.updateValueAndValidity();
+      this.mensagemSucesso = 'Usuário cadastrado com sucesso!';
+
+      this.nome = '';
+      this.email = '';
+      this.senha = '';
+      this.mostrarSenha = false;
+    } catch (error: any) {
+      console.error('Erro ao cadastrar:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        this.mensagemErro = 'Este e-mail já está cadastrado.';
+      } else if (error.code === 'auth/weak-password') {
+        this.mensagemErro = 'A senha deve ter pelo menos 6 caracteres.';
+      } else {
+        this.mensagemErro = 'Erro ao cadastrar usuário. Verifique os dados e tente novamente.';
+      }
+    } finally {
+      this.carregando = false;
     }
-    if (this.formularioCadastro.invalid){
-      this.mensagemSucesso='';
-      return;
-    }
-    this.mensagemSucesso='Cadastro validado com sucesso!';
   }
 }

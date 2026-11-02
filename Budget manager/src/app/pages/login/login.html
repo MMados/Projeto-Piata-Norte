@@ -9,22 +9,25 @@
   <section class="login__panel">
     <div class="login__box">
 
-      
       <h1>Bem-vindo de volta!</h1>
       <p class="login__sub">Entre com seus dados para acessar sua conta.</p>
 
-      <form class="form" (submit)="$event.preventDefault()">
+      <form class="form" [formGroup]="formularioLogin" (ngSubmit)="validarLogin()">
 
         <div class="field">
           <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" placeholder="seu@email.com" autocomplete="email" required>
-          @if (formularioLogin.get('email')?.touched &&
-          formularioLogin.get('email')?.hasError('required')){
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            placeholder="seu@email.com" 
+            autocomplete="email" 
+            required>
+
+          @if (formularioLogin.get('email')?.touched && formularioLogin.get('email')?.hasError('required')){
             <small class="erro">Informe seu e-mail.</small>
           }
-
-          @else if(formularioLogin.get('email')?.touched &&
-          formularioLogin.get('email')?.hasError('email')){
+          @else if (formularioLogin.get('email')?.touched && formularioLogin.get('email')?.hasError('email')){
             <small class="erro">Informe um e-mail válido.</small>
           }
         </div>
@@ -32,25 +35,38 @@
         <div class="field">
           <div class="field__row">
             <label for="senha">Senha</label>
-            <a routerLink="/cadastro" class="link link--small">Esqueci minha senha</a>
+              <a type="button" (click)="esqueciMinhaSenha()" class="esqueci-senha-link"> Esqueci minha senha</a>
           </div>
           <div class="password">
-            <input type="password" id="senha" name="senha" placeholder="••••••••" autocomplete="current-password" required>
-            <button type="button" class="password__toggle" (click)="alternarSenha()">{{senhaVisivel ? 'Ocultar': 'Mostrar'}}</button>
+            <input 
+              [type]="senhaVisivel ? 'text' : 'password'" 
+              id="senha" 
+              formControlName="senha" 
+              placeholder="••••••••" 
+              autocomplete="current-password" 
+              required>
+            <button type="button" class="password__toggle" (click)="alternarSenha()">
+              {{senhaVisivel ? 'Ocultar': 'Mostrar'}}
+            </button>
           </div>
-          @if (formularioLogin.get('senha')?.touched &&
-          formularioLogin.get('senha')?.hasError('required')){
+
+          @if (formularioLogin.get('senha')?.touched && formularioLogin.get('senha')?.hasError('required')){
             <small class="erro">Informe sua senha.</small>
           }
         </div>
 
-        <button type="submit" routerLink="/dashboard" class="btn">Entrar na minha conta</button>
+        <button type="submit" class="btn" [disabled]="carregando">
+          {{ carregando ? 'Entrando...' : 'Entrar na minha conta' }}
+        </button>
+
         @if (mensagemSucesso){
           <p class="mensagem_sucesso" role="status">{{mensagemSucesso}}</p>
         }
-      </form>
 
-      <p class="login__signup">Não tem conta? <a routerLink="/cadastro" class="link">Cadastre-se</a></p>
+        @if (mensagemErro){
+          <p class="erro" role="alert">{{mensagemErro}}</p>
+        }
+      </form>
 
     </div>
   </section>

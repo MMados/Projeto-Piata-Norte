@@ -1,9 +1,13 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
-  imports: [],
   selector: 'app-lading-page',
-  styleUrl: './lading-page.css',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './lading-page.html',
+  styleUrls: ['./lading-page.css']
 })
-export class LadingPage {}
+export class LadingPage {
+
+}

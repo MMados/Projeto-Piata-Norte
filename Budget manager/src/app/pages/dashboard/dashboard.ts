@@ -6,7 +6,7 @@ import { Timestamp } from 'firebase/firestore';
 import { CardSummary } from '../../component/card-summary/card-summary';
 import { MenuTop } from '../../component/menu-top/menu-top';
 import { Orcamento } from '../../models/orcamento.model';
-import { OrcamentoService } from '../../services/orcamento';
+import { OrcamentoService } from '../../services/orcamento.service';
 
 type FiltroStatus = 'Todos' | 'Em produção' | 'Finalizados';
 

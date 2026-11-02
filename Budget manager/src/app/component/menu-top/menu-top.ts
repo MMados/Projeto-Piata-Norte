@@ -1,14 +1,13 @@
-import { Component, Input } from "@angular/core";
-import { User } from "../user/user";
+import { Component, Input } from '@angular/core';
+import { HeaderComponent } from '../user/user';
 
 @Component({
-  imports: [User],
-  selector: "app-menu-top",
-  styleUrl: "./menu-top.css",
-  templateUrl: "./menu-top.html",
+  selector: 'app-menu-top',
+  standalone: true,
+  imports: [HeaderComponent],
+  templateUrl: './menu-top.html',
+  styleUrl: './menu-top.css'
 })
-export class MenuTop {
-    // Isso faz com que seja selecionado em toda página o nome da pagina atual
-    // de padrão fica como inicio
-    @Input() paginaAtual: string = 'Início';
+export class MenuTop{
+  @Input() paginaAtual: string = '';
 }

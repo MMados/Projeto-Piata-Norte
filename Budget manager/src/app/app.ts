@@ -27,8 +27,8 @@ export class App {
     });
   }
 
-  verificarSeExibeMenu(url: string): boolean {
-    const paginasComMenu = ['/dashboard', '/orcamento','/preview'];
-    return paginasComMenu.includes(url);
-  }
+ verificarSeExibeMenu(url: string): boolean {
+  const paginasComMenu = ['/dashboard', '/orcamento', '/preview', '/cadastro'];
+  return paginasComMenu.some(pagina => url.startsWith(pagina));
+}
 }
