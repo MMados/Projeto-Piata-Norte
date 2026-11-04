@@ -22,6 +22,7 @@ export interface Orcamento {
   valor_total: number;
   status: string;
   itens: ItemOrcamento[];
+  editor?: string;
 }
 
 export interface OrcamentoFormDraft {
