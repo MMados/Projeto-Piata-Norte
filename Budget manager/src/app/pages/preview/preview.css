@@ -1,15 +1,13 @@
-:host {
+app-preview {
   --red: #AD1F23;
   --black: #000000;
   --white: #FFFFFF;
   --gray: #F4F6F9;
-  --gray-dark: #E4E8F0;   /* fundo da área da prévia (tom mais escuro do cinza) */
+  --gray-dark: #E4E8F0;
 
   --font-title: "Montserrat", "Segoe UI", Arial, sans-serif;
   --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
-  --font-doc: "Noto Serif", "Times New Roman", Georgia, serif;
-  --font-script: "Great Vibes", "Brush Script MT", cursive;
-  --font-signature: "Cormorant Garamond", Georgia, serif;
+  --font-doc: Georgia, "Times New Roman", Times, serif;
 
   display: block;
   width: 100%;
@@ -21,28 +19,40 @@
   -webkit-font-smoothing: antialiased;
 }
 
-*,
-*::before,
-*::after { box-sizing: border-box; margin: 0; padding: 0; }
+app-preview *,
+app-preview *::before,
+app-preview *::after { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
-a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; }
+app-preview a { color: inherit; text-decoration: none; }
+app-preview button { font-family: inherit; cursor: pointer; }
 
-a:focus-visible,
-button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+app-preview a:focus-visible,
+app-preview button:focus-visible { 
+  outline: 3px solid var(--red); 
+  outline-offset: 3px; 
+}
 
-.page { width: 100%; max-width: none; margin: 0; padding: 0 40px 40px; }
+app-preview .page { 
+  width: 100%; 
+  max-width: none; 
+  margin: 0; 
+  padding: 0 40px 40px; 
+}
 
 /* ---------- Topo ---------- */
-.topbar {
+app-preview .topbar {
   height: 68px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.topbar__crumb { font-size: 14px; color: var(--black); }
+app-preview .topbar__crumb { font-size: 14px; color: var(--black); }
 
-.user-button {
+app-preview .user-button {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -56,23 +66,21 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   transition: all 0.2s ease;
 }
 
-.user-button:hover {
+app-preview .user-button:hover {
   background-color: #fafafa;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
-.user-name {
+app-preview .user-name {
   font-size: 14px;
   color: #4b5563;
   font-weight: 400;
 }
 
-.chevron-icon {
-  color: #6b7280;
-}
+app-preview .chevron-icon { color: #6b7280; }
 
 /* ---------- Voltar ---------- */
-.back {
+app-preview .back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -87,14 +95,14 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   color: #252830;
   transition: color .2s ease, border-color .2s ease, background-color .2s ease;
 }
-.back:hover {
+app-preview .back:hover {
   border-color: #f2caca;
   background: #fce8e8;
   color: #a81c1c;
 }
 
-/* ---------- Título e ações ---------- */
-.heading {
+/* ---------- Título e Ações ---------- */
+app-preview .heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -102,7 +110,7 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   margin-top: 28px;
 }
 
-.eyebrow {
+app-preview .eyebrow {
   display: block;
   font-size: 12px;
   font-weight: 700;
@@ -112,7 +120,7 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   margin-bottom: 10px;
 }
 
-.heading h1 {
+app-preview .heading h1 {
   font-family: var(--font-title);
   font-weight: 600;
   font-size: 36px;
@@ -120,9 +128,9 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   letter-spacing: -0.01em;
   color: #111111;
 }
-.heading__sub { margin-top: 10px; font-size: 16px; color: #555a62; }
+app-preview .heading__sub { margin-top: 10px; font-size: 16px; color: #555a62; }
 
-.status-badge {
+app-preview .status-badge {
   display: inline-flex;
   align-items: center;
   margin-top: 12px;
@@ -134,12 +142,12 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   font-weight: 600;
   white-space: nowrap;
 }
-.status-badge--producao { background: #fce8e8; color: #a81c1c; }
-.status-badge--finalizado { background: #141414; color: #ffffff; }
+app-preview .status-badge--producao { background: #fce8e8; color: #a81c1c; }
+app-preview .status-badge--finalizado { background: #141414; color: #ffffff; }
 
-.actions { display: flex; align-items: flex-start; gap: 12px; }
+app-preview .actions { display: flex; align-items: flex-start; gap: 12px; }
 
-.btn {
+app-preview .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -148,16 +156,16 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   font-weight: 600;
   transition: background-color .2s ease, color .2s ease;
 }
-.btn--red {
+app-preview .btn--red {
   height: 48px;
   padding: 0 26px;
   border: 0;
   background: var(--red);
   color: var(--white);
 }
-.btn--red:hover { background: #8f191d; }
+app-preview .btn--red:hover { background: #8f191d; }
 
-.btn--outline {
+app-preview .btn--outline {
   height: 42px;
   padding: 0 20px;
   border: 1.5px solid var(--black);
@@ -166,10 +174,10 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   font-size: 14px;
   font-weight: 700;
 }
-.btn--outline:hover { background: var(--black); color: var(--white); }
+app-preview .btn--outline:hover { background: var(--black); color: var(--white); }
 
-/* ---------- Área da prévia ---------- */
-.preview {
+/* ---------- Área da Prévia ---------- */
+app-preview .preview {
   margin-top: 28px;
   padding: 32px 24px 26px;
   background: var(--gray-dark);
@@ -178,144 +186,187 @@ button:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
   flex-direction: column;
   align-items: center;
 }
-.preview__caption {
+app-preview .preview__caption {
   margin-top: 16px;
   font-size: 12px;
   color: #8a8f98;
   text-align: center;
 }
-.preview__message { margin-top: 32px; text-align: center; }
+app-preview .preview__message { margin-top: 32px; text-align: center; }
 
-/* ---------- Folha do PDF (tudo em em: escala junto) ---------- */
-.paper {
-  font-size: 10.5px;                 /* 1em = 10,5px */
-  width: 56.57em;                    /* 594px (A4) */
-  max-width: 100%;
-  aspect-ratio: 1 / 1.4142;          /* proporção A4 */
-  padding: 5.43em 4.95em 0;
-  background: var(--white);
-  border: 1px solid #e6e8ec;
-  box-shadow: 0 2px 14px rgba(20, 30, 50, 0.1);
-  font-family: var(--font-doc);
-  font-size-adjust: none;
-  color: #111111;
-  line-height: 1.62;
-  overflow: hidden;
-}
-
-.paper p { margin-bottom: 1.33em; }
-
-.paper__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-.paper__logo {
-  width: 5.33em;
-  height: 5.33em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--red);
-  color: var(--white);
-  font-family: var(--font-sans);
-  font-size: 1.7em;
-  font-weight: 600;
-}
-.paper__title { text-align: right; margin-top: -0.7em; }
-.paper__title h2 {
-  font-family: var(--font-script);
-  font-weight: 400;
-  font-size: 3.6em;
-  line-height: 1.1;
-  color: #111111;
-}
-.paper__title p {
-  margin: 0.2em 0 0;
-  font-family: var(--font-script);
-  font-size: 1.85em;
-  line-height: 1.2;
-}
-
-.paper__ref {
-  margin: 1.5em 0 1.9em;
-  font-size: 0.76em;
-  color: #333;
-}
-
-.paper__subtitle {
-  margin: 0 0 1.1em;
-  text-align: center;
-  font-size: 1em;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-.paper__list { list-style: none; margin-bottom: 1.4em; }
-.paper__list li { position: relative; padding-left: 0.95em; }
-.paper__list li::before { content: "•"; position: absolute; left: 0; }
-.paper__cont { display: inline-block; margin-left: -0.05em; }
-
-.paper .paper__total { margin-bottom: 1.33em; }
-
-.paper__signature {
-  margin: 0.9em 0 0.5em;
-  font-family: var(--font-signature);
-  font-style: italic;
-  font-size: 1.62em;
-  line-height: 1.2;
-}
-
-.paper__footer {
+/* ---------- Folha A4 ---------- */
+.paper-a4 {
+  background-color: #ffffff;
+  color: #000000;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 22mm 22mm 18mm 22mm;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  font-style: normal;
+}
+
+/* Cabeçalho: Logo (esquerda) e Orçamento + Data (direita) */
+.a4-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.a4-header__logo img {
+  width: 110px;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.a4-header__right { text-align: right; }
+
+.a4-header__title {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 20pt;
+  font-weight: bold;
+  color: #000000;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.a4-header__date {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 11pt;
+  margin: 0;
+  color: #000000;
+}
+
+/* Informações do Cliente */
+.a4-client { margin-bottom: 18px; }
+.a4-client p { margin: 2px 0; }
+
+/* Texto de Introdução */
+.a4-intro { margin-bottom: 12px; }
+
+/* Itens */
+.a4-items { margin-bottom: 20px; }
+.a4-item {
+  margin-bottom: 8px;
+  text-align: justify;
+}
+
+/* Condições do Orçamento */
+.a4-conditions { margin-bottom: 20px; }
+.a4-conditions h2 {
+  font-family: Georgia, "Times New Roman", Times, serif;
   text-align: center;
-  font-family: var(--font-script);
-  font-size: 1.33em;
-  line-height: 1.58;
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.5px;
+  color: #000000;
+}
+.a4-conditions ul {
+  padding-left: 20px;
+  margin: 0;
+}
+.a4-conditions li { margin-bottom: 4px; }
+
+/* Encerramento */
+.a4-closing { margin-bottom: 20px; }
+.a4-closing p { margin: 2px 0; }
+.a4-closing__salutation { margin-top: 14px !important;}
+.a4-closing__names { margin-top: 14px !important; }
+.a4-closing__company { margin-top: 14px !important; }
+
+/* Rodapé centralizado no final da folha */
+.a4-footer {
+  margin-top: auto;
+  text-align: center;
+  font-size: 10pt;
+  line-height: 1.4;
+  padding-top: 16px;
+}
+.a4-footer p { margin: 2px 0; }
+.a4-footer__title {
+  font-size: 11pt;
+  font-weight: bold;
+  margin-bottom: 4px !important;
 }
 
-/* ==========================================================
-   Responsivo
-   ========================================================== */
+/* ---------- Responsivo ---------- */
 @media (max-width: 900px) {
-  .page { padding: 0 20px 32px; }
-  .heading { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .heading h1 { font-size: 30px; }
-  .preview { padding: 20px 12px 20px; border-radius: 24px; }
+  app-preview .page { padding: 0 20px 32px; }
+  app-preview .heading { flex-direction: column; align-items: flex-start; gap: 20px; }
+  app-preview .heading h1 { font-size: 30px; }
+  app-preview .preview { padding: 20px 12px 20px; border-radius: 24px; }
 }
 
-@media (max-width: 700px) {
-  .user__name { display: none; }
-  .heading h1 { font-size: 26px; }
-  .paper { font-size: calc((100vw - 80px) / 56.57); }
+@media (max-width: 768px) {
+  app-preview .heading h1 { font-size: 26px; }
+  .paper-a4 {
+    width: 100%;
+    min-height: auto;
+    padding: 15mm 15mm 15mm 15mm;
+    font-size: 10pt;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn { transition: none; }
+  app-preview .btn { transition: none; }
 }
 
-@page { size: A4; margin: 0; }
-
+/* ==========================================================
+   REGRAS GLOBAIS DE IMPRESSÃO (OCULTA O MENU LATERAL E TUDO MAIS)
+   ========================================================== */
 @media print {
-  :host,
-  .page { min-height: 0; background: #ffffff; }
-  .page { padding: 0; }
-  app-menu-top,
-  .back,
-  .heading,
-  .preview__caption { display: none; }
-  .preview { margin: 0; padding: 0; background: #ffffff; }
-  .paper {
-    width: 210mm;
-    max-width: none;
-    min-height: 297mm;
-    aspect-ratio: auto;
-    border: 0;
-    box-shadow: none;
-    overflow: visible;
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+  }
+
+  html, 
+  body {
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
+
+  /* Oculta tudo no DOM inteiro (incluindo o menu lateral exterior) */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Torna visível unicamente a folha A4 e os seus elementos filhos */
+  .paper-a4,
+  .paper-a4 * {
+    visibility: visible !important;
+  }
+
+  .paper-a4 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 18mm 20mm 15mm 20mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
   }
 }

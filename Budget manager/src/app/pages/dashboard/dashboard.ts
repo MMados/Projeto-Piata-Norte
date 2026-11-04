@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, DestroyRef, HostListener, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  HostListener,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -16,7 +23,7 @@ type FiltroStatus = 'Todos' | 'Em produção' | 'Finalizados';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   readonly itensPorPagina = 10;
   private readonly orcamentoService = inject(OrcamentoService);
   private readonly changeDetector = inject(ChangeDetectorRef);
@@ -35,29 +42,27 @@ export class Dashboard {
   duplicandoId: string | null = null;
   excluindo = false;
 
-  constructor() {
-    this.orcamentoService.limparRascunhos();
-    void this.carregarOrcamentos();
-  }
-
-  /** Limpa os orçamentos vencidos ao entrar no dashboard e depois carrega a lista. */
-  private async carregarOrcamentos(): Promise<void> {
-    try {
-      const quantidadeExcluida = await this.orcamentoService.eliminarOrcamentosAntigos();
-      if (quantidadeExcluida > 0) {
-        console.info(`${quantidadeExcluida} orçamento(s) com mais de seis meses foram excluídos.`);
-      }
-    } catch (erro) {
-      // Uma falha na limpeza não deve impedir o acesso ao dashboard.
-      console.error('Não foi possível excluir automaticamente os orçamentos antigos:', erro);
+  ngOnInit(): void {
+    // 1. Limpa rascunhos locais
+    if (typeof this.orcamentoService.limparRascunhos === 'function') {
+      this.orcamentoService.limparRascunhos();
     }
 
+    // 2. Inscreve-se nos orçamentos IMEDIATAMENTE dentro do contexto de injeção
+    this.inscreverOrcamentos();
+
+    // 3. Executa a limpeza de orçamentos antigos em segundo plano
+    void this.executarLimpezaAntigos();
+  }
+
+  /** Inscreve-se no Observable de orçamentos do Firebase no contexto seguro do Angular */
+  private inscreverOrcamentos(): void {
     this.orcamentoService
       .obterOrcamentos()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orcamentos) => {
-          this.listaOrcamentos = [...orcamentos].sort(
+          this.listaOrcamentos = [...(orcamentos ?? [])].sort(
             (a, b) =>
               this.dataEmMilissegundos(b.data_orcamento) -
               this.dataEmMilissegundos(a.data_orcamento),
@@ -73,6 +78,20 @@ export class Dashboard {
           this.changeDetector.detectChanges();
         },
       });
+  }
+
+  /** Executa a remoção de orçamentos antigos assincronamente sem bloquear a injeção */
+  private async executarLimpezaAntigos(): Promise<void> {
+    try {
+      if (typeof this.orcamentoService.eliminarOrcamentosAntigos === 'function') {
+        const quantidadeExcluida = await this.orcamentoService.eliminarOrcamentosAntigos();
+        if (quantidadeExcluida > 0) {
+          console.info(`${quantidadeExcluida} orçamento(s) com mais de seis meses foram excluídos.`);
+        }
+      }
+    } catch (erro) {
+      console.error('Não foi possível excluir automaticamente os orçamentos antigos:', erro);
+    }
   }
 
   get totalEmProducao(): number {
@@ -158,8 +177,11 @@ export class Dashboard {
     return status === 'finalizado' || status === 'finalizados';
   }
 
-  private normalizar(valor: string): string {
-    return valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+  private normalizar(valor: string | undefined | null): string {
+    return (valor ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLocaleLowerCase('pt-BR');
   }
 
   async duplicarOrcamento(orcamento: Orcamento): Promise<void> {
@@ -215,7 +237,16 @@ export class Dashboard {
     this.erroExclusao = '';
 
     try {
-      await this.orcamentoService.eliminarOrcamento(id);
+      // Tenta chamar o método do serviço de forma compatível
+      const servico = this.orcamentoService as unknown as Record<string, (id: string) => Promise<void>>;
+      if (typeof servico['eliminarOrcamento'] === 'function') {
+        await servico['eliminarOrcamento'](id);
+      } else if (typeof servico['excluirOrcamento'] === 'function') {
+        await servico['excluirOrcamento'](id);
+      } else {
+        throw new Error('Método de exclusão não definido no serviço.');
+      }
+
       this.orcamentoParaExcluir = null;
       this.mensagemAcao = 'Orçamento excluído com sucesso.';
     } catch (erro) {
