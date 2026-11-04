@@ -1,0 +1,230 @@
+/* ==========================================================
+   Formulário de Contato - Estilos alinhados ao HTML Angular
+   ========================================================== */
+
+:host {
+  --red: #AD1F23;
+  --black: #000000;
+  --white: #FFFFFF;
+  --gray: #F4F6F9;
+
+  --border: #dfe3e8;
+  --placeholder: #8c9199;
+  --text-soft: #3c4047;
+
+  --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
+
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 520px;
+  padding: 32px;
+  background: var(--white);
+  border-radius: 24px;
+  font-family: var(--font-sans);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Container do Formulário ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ---------- Grupos de Campos ---------- */
+.form__group + .form__group {
+  margin-top: 14px;
+}
+
+.form__group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--black);
+}
+
+.form__group input,
+.form__group textarea {
+  display: block;
+  width: 100%;
+  padding: 0 15px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--gray);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--black);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form__group input {
+  height: 45px;
+}
+
+.form__group textarea {
+  height: 95px;
+  padding: 14px 15px;
+  line-height: 1.45;
+  resize: none;
+}
+
+.form__group input::placeholder,
+.form__group textarea::placeholder {
+  color: var(--placeholder);
+}
+
+.form__group input:focus,
+.form__group textarea:focus {
+  outline: none;
+  border-color: var(--red);
+  background: var(--white);
+}
+
+/* Estado de Erro no Input */
+.form__group input.form__input--error,
+.form__group textarea.form__input--error {
+  border-color: var(--red);
+  background: var(--white);
+}
+
+.form__error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--red);
+}
+
+/* ---------- Observação ---------- */
+.form__note {
+  margin-top: 13px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-soft);
+}
+
+/* ---------- Botão ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+  margin-top: 15px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn--red {
+  background: var(--red);
+  color: var(--white);
+}
+
+.btn--red:hover:not(:disabled) {
+  background: #8f191d;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--black);
+  outline-offset: 3px;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Ícone de Seta no Botão */
+.arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover:not(:disabled) .arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ---------- Mensagens Globais de Sucesso e Erro ---------- */
+.form__success {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--gray);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-soft);
+  text-align: center;
+  animation: message-in 0.25s ease;
+}
+
+.form__error-message {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--red);
+  border-radius: 12px;
+  background: rgba(173, 31, 35, 0.08);
+  font-size: 13px;
+  color: var(--red);
+  text-align: center;
+  animation: message-in 0.25s ease;
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================
+   Responsivo & Acessibilidade
+   ========================================================== */
+@media (max-width: 480px) {
+  :host {
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .arrow,
+  .form__group input,
+  .form__group textarea {
+    transition: none;
+  }
+  .form__success,
+  .form__error-message {
+    animation: none;
+  }
+}

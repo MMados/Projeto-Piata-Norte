@@ -1,0 +1,30 @@
+<section class="picker" aria-labelledby="picker-titulo">
+  <h2 id="picker-titulo">Conversar pelo WhatsApp</h2>
+  <p class="picker__sub">Escolha um contato para começar.</p>
+
+  <ul class="picker__list">
+
+    @for (contato of contatos; track contato.numero) {
+      <li>
+        <a [href]="'https://wa.me/' + contato.numero + '?text=' + mensagem" 
+           class="contact" 
+           target="_blank" 
+           rel="noopener noreferrer">
+          <span class="contact__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="contact__text">
+            <strong>{{ contato.nome }}</strong>
+            <small>{{ contato.descricao }}</small>
+          </span>
+          <svg class="contact__arrow" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path d="M7 17L17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </li>
+    }
+    
+  </ul>
+</section>

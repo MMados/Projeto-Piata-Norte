@@ -54,8 +54,12 @@
         <div class="about__content">
           <span class="eyebrow">Sobre a marcenaria</span>
           <h2>Confiança se constrói no cuidado.</h2>
-          <p>Há 26 anos que a Marcenaria Piatã Norte traz bagagem e dedicação. O que nasceu da paixão pelo trabalho artesanal transformou-se numa trajetória sólida, construída com base na confiança e no reconhecimento contínuo de clientes e parceiros arquitetos.</p>
-          <p>Somos especializados na fabricação de móveis planejados e sob medida para ambientes residenciais e comerciais. Nosso foco é traduzir com máxima precisão os projetos trazidos por arquitetos e as ideias de cada cliente.</p>
+          <p>Há 26 anos que a Marcenaria Piatã Norte traz bagagem e dedicação. O que nasceu da paixão pelo trabalho
+            artesanal transformou-se numa trajetória sólida, construída com base na confiança e no reconhecimento
+            contínuo de clientes e parceiros arquitetos.</p>
+          <p>Somos especializados na fabricação de móveis planejados e sob medida para ambientes residenciais e
+            comerciais. Nosso foco é traduzir com máxima precisão os projetos trazidos por arquitetos e as ideias de
+            cada cliente.</p>
         </div>
       </div>
 
@@ -64,14 +68,14 @@
         <p class="team__sub">Marcenaria Piatã Norte: 26 anos a transformar projetos em realidade.</p>
         <div class="team__grid">
           <article class="person">
-            <span class="person__avatar" aria-hidden="true"></span>
+            <span class="person__avatar" aria-hidden="true"> <img src="Mariano.jpeg" alt="Mariano"></span>
             <div>
               <strong>Mariano Alves</strong>
               <span>Proprietário</span>
             </div>
           </article>
           <article class="person">
-            <span class="person__avatar" aria-hidden="true"></span>
+            <span class="person__avatar" aria-hidden="true"> <img src="Homero.jpeg" alt="Homero"> </span>
             <div>
               <strong>Homero Pereira</strong>
               <span>Proprietário</span>
@@ -160,42 +164,19 @@
         <div class="contact__content">
           <span class="eyebrow eyebrow--light">Vamos planejar?</span>
           <h2>Seu próximo móvel começa aqui.</h2>
-          <p>Conte o que você imagina. Se tiver medidas aproximadas em metros, inclua na mensagem para começar a conversa.</p>
-          <a href="#" class="btn btn--white">
-            Prefiro falar pelo WhatsApp <span class="arrow" aria-hidden="true">↗</span>
-          </a>
-          <p class="contact__note">Canal de WhatsApp a configurar.</p>
+          <p>Conte o que você imagina. Se tiver medidas aproximadas em metros, inclua na mensagem para começar a
+            conversa.</p>
+          <app-whatsapp-selector></app-whatsapp-selector>
+          <p class="contact__note">Canal de WhatsApp.</p>
         </div>
 
-        <form class="form" (submit)="$event.preventDefault()">
-          <div class="form__group">
-            <label for="nome">Nome</label>
-            <input type="text" id="nome" name="nome" placeholder="Como podemos chamar você?" required>
-          </div>
+        <!-- Componente do formulário isolado -->
+        <app-contact-form></app-contact-form>
 
-          <div class="form__group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" placeholder="Seu e-mail para retorno" required>
-          </div>
-
-          <div class="form__group">
-            <label for="telefone">Telefone</label>
-            <input type="tel" id="telefone" name="telefone" placeholder="DDD + número">
-          </div>
-
-          <div class="form__group">
-            <label for="mensagem">Mensagem</label>
-            <textarea id="mensagem" name="mensagem" rows="3" placeholder="Qual ambiente você quer transformar?"></textarea>
-          </div>
-
-          <p class="form__note">Usamos seus dados só para responder ao seu pedido.</p>
-          <button type="submit" class="btn btn--red btn--block">
-            Enviar solicitação <span class="arrow" aria-hidden="true">↗</span>
-          </button>
-        </form>
       </div>
     </div>
   </section>
+
 </main>
 
 <!-- FOOTER -->
@@ -213,7 +194,7 @@
     </div>
     <div class="footer__bottom">
       <p>© 2026 Marcenaria Piatã Norte. Todos os direitos reservados.</p>
-      <p>Siga-nos: <a href="#">Instagram</a></p>
+      <p>Siga-nos: <a href="https://www.instagram.com/marcenariapiatanorte/">Instagram</a></p>
     </div>
   </div>
 </footer>
