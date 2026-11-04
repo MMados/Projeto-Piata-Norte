@@ -5,12 +5,12 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Formulario } from './pages/formulario/formulario';
 import { Preview } from './pages/preview/preview';
 import { NotFound } from './pages/not-found/not-found';
-import { LadingPage } from './pages/lading-page/lading-page';
+import { LadingPageComponent } from './pages/lading-page/lading-page';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   // Rotas públicas
-  { path: '', component: LadingPage },
+  { path: '', component: LadingPageComponent },
   { path: 'login', component: Login },
 
   // Rotas protegidas (bloqueadas para quem não está logado)
