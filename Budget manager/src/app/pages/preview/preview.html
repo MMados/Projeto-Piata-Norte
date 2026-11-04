@@ -31,62 +31,61 @@
     </section>
 
     <section class="preview">
-        <article class="paper" aria-label="Prévia do orçamento">
-            <div class="paper__head">
-                <img src="Logo.png" alt="Logotipo Piatã Norte"
-                    style="width: 60px; height: 60px; object-fit: contain; display: block; margin-bottom: 10px;">
-                <div class="paper__title">
-                    <h2>Orçamento</h2>
-                    <p>São Paulo, {{ formatarDataExtensa(orcamento.data_orcamento) }}</p>
+        <article class="paper-a4" aria-label="Prévia do orçamento">
+            <header class="a4-header">
+                <div class="a4-header__logo">
+                    <img src="Logo.png" alt="Logotipo Piatã Norte">
                 </div>
+                <div class="a4-header__right">
+                    <h1 class="a4-header__title">ORÇAMENTO</h1>
+                    <p class="a4-header__date">São Paulo {{ formatarDataExtensa(orcamento.data_orcamento) }}</p>
+                </div>
+            </header>
+
+            <div class="a4-client">
+                <p><strong>A/C:</strong> {{ orcamento.arquiteto || '' }}</p>
+                <p><strong>Cliente(s):</strong> {{ orcamento.cliente }}</p>
             </div>
 
-            <p class="paper__ref">{{ montarCodigo(orcamento) }}</p>
+            <p class="a4-intro">Conforme solicitação estamos enviando orçamento para os seguintes itens:</p>
 
-            <p>A/c: {{ orcamento.arquiteto || '—' }}.</p>
-            <p>Cliente {{ orcamento.cliente }}.</p>
-            <p>Projeto: {{ orcamento.nome_projeto }}.</p>
-            <p>Conforme solicitação, estamos enviando orçamento para os seguintes itens:</p>
+            <div class="a4-items">
+                @for (movel of orcamento.itens; track $index; let posicao = $index) {
+                <p class="a4-item">
+                    {{ posicao + 1 }} - {{ movel.descricao }}. Medidas: {{ formatarMetros(movel.med_largura) }} m de comprimento, {{ formatarMetros(movel.med_altura) }} m de altura e {{ formatarMetros(movel.med_profundidade) }} m de profundidade. Quantidade: 1. Valor: {{ formatarReais(movel.valor) }};
+                </p>
+                }
+            </div>
 
-            @for (movel of orcamento.itens; track $index; let posicao = $index) {
-            <p>{{ posicao + 1 }}- {{ movel.descricao }}</p>
-            <p>
-                Medidas: {{ formatarMetros(movel.med_largura) }} m de comprimento,
-                {{ formatarMetros(movel.med_altura) }} m de altura e
-                {{ formatarMetros(movel.med_profundidade) }} m de profundidade.<br>
-                Quantidade: 1. Valor: {{ formatarReais(movel.valor) }}
-            </p>
-            }
+            <br>
+            <section class="a4-conditions">
+                <h2>CONDIÇÕES DO ORÇAMENTO</h2>
+                <ul>
+                    <li>Prazo de entrega de {{ orcamento.prazo_de_entrega || '10' }} após a contratação.</li>
+                    <li>1 ano de garantia, desde que observadas as condições adequadas de uso.</li>
+                    <li>O pagamento é efetuado 50% de sinal na contratação e 50% na entrega e aprovação.</li>
+                </ul>
+            </section>
 
-            <h3 class="paper__subtitle">CONDIÇÕES DO ORÇAMENTO</h3>
+            <div class="a4-closing">
+                <p>Agradecemos a oportunidade e permanecemos à disposição para quaisquer esclarecimentos.</p>
+            </div>
 
-            <ul class="paper__list">
-                <li>Prazo: {{ orcamento.prazo_de_entrega || 'A combinar' }} após aprovação e conferência das medidas.</li>
-                <li>1 ano de garantia, observadas as condições adequadas de uso.</li>
-                <li>
-                    Pagamento: {{ orcamento.pagamento || '50% na contratação e 50% na entrega e instalação.' }}<br>
-                    <span class="paper__cont">
-                        Entrada de {{ formatarReais(calcularMetade(orcamento)) }} e
-                        saldo de {{ formatarReais(calcularMetade(orcamento)) }}.
-                    </span>
-                </li>
-            </ul>
 
-            <p class="paper__total"><strong>•&nbsp; O valor total é de {{ formatarReais(orcamento.valor_total) }}.</strong></p>
+            <div class="a4-closing">
+                <b class="a4-closing__salutation">Atenciosamente,</b>
+                <p class="a4-closing__names">Mariano Alves da Silva &amp; Homero Pereira de Santana</p>
+                <small class="a4-closing__company">Marcenaria Piatã Norte</small>
+            </div>
+                
 
-            <p>Agradecemos a oportunidade e permanecemos à disposição para quaisquer esclarecimentos.</p>
-            <p><strong>Atenciosamente,</strong></p>
-            <p>Mariano Alves da Silva &amp; Homero Pereira de Santana</p>
-
-            <p class="paper__signature">Marcenaria Piatã Norte</p>
-
-            <address class="paper__footer">
-                <span>Piatã Norte Marcenaria</span>
-                <span>Rua José Henrique Bello 04 - Jardim Alvorada - São Paulo - SP.</span>
-                <span>Mariano Alves (11) 91854-3085</span>
-                <span>Homero Pereira (11) 96440-7514</span>
-                <span>Email: piatanorte.moveis&#64;hotmail.com</span>
-            </address>
+            <footer class="a4-footer">
+                <p class="a4-footer__title">Piatã Norte Marcenaria</p>
+                <p>Rua José Henrique Bello 04 - Jardim Alvorada - São Paulo - SP.</p>
+                <p>Mariano Alves (11) 91854-3085</p>
+                <p>Homero Pereira (11) 96440-7514</p>
+                <p>Email: piatanorte.moveis&#64;hotmail.com</p>
+            </footer>
         </article>
 
         <p class="preview__caption">Fim do documento · página 1 de 1 · {{ montarCodigo(orcamento) }}.pdf</p>

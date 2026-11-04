@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, switchMap } from 'rxjs';
@@ -7,25 +7,25 @@ import { Orcamento, OrcamentoFormDraft } from '../../models/orcamento.model';
 import { OrcamentoService } from '../../services/orcamento.service';
 
 const MESES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
 ];
 
 const EXEMPLO: Orcamento = {
   id_orcamento: 'EXEMPLO-TESTE-01',
   nome_projeto: 'Projeto fictício de demonstração',
-  data_orcamento: '2026-01-15',
-  arquiteto: 'Arquiteto de exemplo',
-  cliente: 'Cliente de demonstração',
-  prazo_de_entrega: 'Prazo ilustrativo',
-  valor_total: 15,
+  data_orcamento: '2026-11-02',
+  arquiteto: 'Mariano',
+  cliente: 'Mariane',
+  prazo_de_entrega: '10 dias úteis',
+  valor_total: 10000,
   status: 'Em produção',
   itens: [
     {
-      descricao: 'Item de teste: móvel pequeno usado apenas para demonstrar a prévia.',
-      med_largura: 0.1, med_altura: 0.1, med_profundidade: 0.1,
+      descricao: 'Cama: Madeira',
+      med_largura: 2.0, med_altura: 1.0, med_profundidade: 1.0,
       metro_movel3: 0.001, material_por_metro3: 10000,
-      insumos: 2, taxa_mao_de_obra: 3, valor: 15,
+      insumos: 2, taxa_mao_de_obra: 3, valor: 10000,
     },
   ],
 };
@@ -47,6 +47,7 @@ function ehRascunho(valor: unknown): valor is OrcamentoFormDraft {
   selector: 'app-preview',
   styleUrl: './preview.css',
   templateUrl: './preview.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class Preview {
   private readonly rota = inject(ActivatedRoute);
@@ -56,6 +57,7 @@ export class Preview {
   private readonly rascunhoFormulario = ehRascunho(this.estado?.['rascunhoFormulario'])
     ? this.estado['rascunhoFormulario']
     : undefined;
+
   readonly retornoPreview =
     typeof this.estado?.['retornoPreview'] === 'string' &&
     (this.estado['retornoPreview'].startsWith('/orcamento/') ||
@@ -96,10 +98,6 @@ export class Preview {
     return Number(valor ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  calcularMetade(orcamento: Orcamento): number {
-    return Number(orcamento.valor_total ?? 0) / 2;
-  }
-// Ajustando datas aqui:
   formatarDataExtensa(texto: string): string {
     const dataIso = /^(\d{4})-(\d{2})-(\d{2})/.exec(texto ?? '');
     const dataBr = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(texto ?? '');
