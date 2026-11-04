@@ -15,9 +15,11 @@ import { CardSummary } from '../../component/card-summary/card-summary';
 import { MenuTop } from '../../component/menu-top/menu-top';
 import { Orcamento } from '../../models/orcamento.model';
 import { OrcamentoService } from '../../services/orcamento.service';
+import { errorCode } from '../../utils/error-code';
 
 type FiltroStatus = 'Todos' | 'Em produção' | 'Finalizados';
 
+/** Página de consulta, busca, paginação e manutenção dos orçamentos. */
 @Component({
   selector: 'app-dashboard',
   imports: [MenuTop, FormsModule, CardSummary, RouterLink],
@@ -71,7 +73,7 @@ export class Dashboard implements OnInit {
           });
         },
         error: (erro) => {
-          console.error('Erro ao carregar os orçamentos:', erro);
+          console.error('Erro ao carregar os orçamentos:', errorCode(erro));
           this.zone.run(() => {
             this.erro = 'Não foi possível carregar os orçamentos. Tente novamente.';
             this.carregando = false;
@@ -90,7 +92,10 @@ export class Dashboard implements OnInit {
         }
       }
     } catch (erro) {
-      console.error('Não foi possível excluir automaticamente os orçamentos antigos:', erro);
+      console.error(
+        'Não foi possível excluir automaticamente os orçamentos antigos:',
+        errorCode(erro),
+      );
     }
   }
 
@@ -186,6 +191,7 @@ export class Dashboard implements OnInit {
       .toLocaleLowerCase('pt-BR');
   }
 
+  /** Cria uma cópia independente do orçamento selecionado. */
   async duplicarOrcamento(orcamento: Orcamento): Promise<void> {
     this.erro = '';
     this.mensagemAcao = '';
@@ -204,7 +210,7 @@ export class Dashboard implements OnInit {
         this.mensagemAcao = 'Orçamento duplicado com sucesso.';
       });
     } catch (erro) {
-      console.error('Erro ao duplicar o orçamento:', erro);
+      console.error('Erro ao duplicar o orçamento:', errorCode(erro));
       this.zone.run(() => {
         this.erro = 'Não foi possível duplicar o orçamento. Tente novamente.';
       });
@@ -234,6 +240,7 @@ export class Dashboard implements OnInit {
     if (this.orcamentoParaExcluir) this.cancelarExclusao();
   }
 
+  /** Confirma a exclusão do documento selecionado. */
   async confirmarExclusao(): Promise<void> {
     const id = this.orcamentoParaExcluir?.id_orcamento;
     if (!id) {
@@ -253,7 +260,7 @@ export class Dashboard implements OnInit {
         this.ajustarPaginaAtual();
       });
     } catch (erro) {
-      console.error('Erro ao excluir o orçamento:', erro);
+      console.error('Erro ao excluir o orçamento:', errorCode(erro));
       this.zone.run(() => {
         this.erroExclusao = 'Não foi possível excluir o orçamento. Tente novamente.';
       });

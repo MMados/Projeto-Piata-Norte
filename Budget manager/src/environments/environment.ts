@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   firebase: {
     apiKey: "AIzaSyANgLZ4NRIJO0WdwZ3QD9WNVifhtcQYcz8",
     authDomain: "projeto-piata-norte.firebaseapp.com",
@@ -8,6 +8,10 @@ export const environment = {
     messagingSenderId: "998745603566",
     appId: "1:998745603566:web:b9fd63ddcc5929b27ee2ff",
     measurementId: "G-BQ71KWBC5M"
+  },
+  emailjs: {
+    serviceId: 'service_hcr8z5c',
+    templateId: 'template_fv1mixi',
+    publicKey: 'mcZsMTL11qihmg_S8',
   }
 };
-

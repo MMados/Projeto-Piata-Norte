@@ -2,16 +2,10 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
-import { Firestore, collection, collectionData, doc, setDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { AuthService } from '../../services/auth';
+import { errorCode } from '../../utils/error-code';
 
-interface UserDoc {
-  uid?: string;
-  nome: string;
-  email: string;
-}
-
+/** Tela interna de gestão dos perfis de usuário. */
 @Component({
   selector: 'app-cadastro',
   standalone: true,
@@ -20,13 +14,8 @@ interface UserDoc {
   styleUrl: './cadastro.css'
 })
 export class Cadastro {
-  private auth = inject(Auth);
-  private firestore = inject(Firestore);
-
-  users$: Observable<UserDoc[]> = collectionData(
-    collection(this.firestore, 'users'),
-    { idField: 'uid' }
-  ) as Observable<UserDoc[]>;
+  private readonly authService = inject(AuthService);
+  readonly users$ = this.authService.obterUsuarios();
 
   // Variáveis do formulário
   nome: string = '';
@@ -38,27 +27,25 @@ export class Cadastro {
   mensagemErro: string = '';
   mensagemSucesso: string = '';
 
+  /** Valida os dados e delega ao serviço a criação da conta e do perfil. */
   async cadastrarUsuario(): Promise<void> {
+    const nome = this.nome.trim();
+    const email = this.email.trim();
+    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!nome || !emailValido || this.senha.length < 6) {
+      this.mensagemErro = 'Informe nome, e-mail válido e senha com pelo menos 6 caracteres.';
+      this.mensagemSucesso = '';
+      return;
+    }
+
+    if (this.carregando) return;
     this.carregando = true;
     this.mensagemErro = '';
     this.mensagemSucesso = '';
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        this.auth,
-        this.email,
-        this.senha
-      );
-
-      const uid = userCredential.user.uid;
-
-      const userRef = doc(this.firestore, `users/${uid}`);
-      await setDoc(userRef, {
-        uid: uid,
-        nome: this.nome,
-        email: this.email,
-        criadoEm: new Date()
-      });
+      await this.authService.cadastrarUsuario(nome, email, this.senha);
 
       this.mensagemSucesso = 'Usuário cadastrado com sucesso!';
 
@@ -66,11 +53,12 @@ export class Cadastro {
       this.email = '';
       this.senha = '';
       this.mostrarSenha = false;
-    } catch (error: any) {
-      console.error('Erro ao cadastrar:', error);
-      if (error.code === 'auth/email-already-in-use') {
+    } catch (error: unknown) {
+      const codigo = errorCode(error);
+      console.error('Erro ao cadastrar:', codigo);
+      if (codigo === 'auth/email-already-in-use') {
         this.mensagemErro = 'Este e-mail já está cadastrado.';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (codigo === 'auth/weak-password') {
         this.mensagemErro = 'A senha deve ter pelo menos 6 caracteres.';
       } else {
         this.mensagemErro = 'Erro ao cadastrar usuário. Verifique os dados e tente novamente.';
@@ -79,4 +67,5 @@ export class Cadastro {
       this.carregando = false;
     }
   }
+
 }

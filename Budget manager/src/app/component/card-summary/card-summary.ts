@@ -1,6 +1,7 @@
 import { Component, Input } from "@angular/core";
 import { NgClass } from '@angular/common';
 
+/** Cartão reutilizável de resumo com rótulo, valor e texto auxiliar. */
 @Component({
   imports: [NgClass],
   selector: "app-card-summary",
@@ -8,11 +9,8 @@ import { NgClass } from '@angular/common';
   templateUrl: "./card-summary.html",
 })
 export class CardSummary {
-    // Define o texto que ficará em cima
-    @Input() label: String = 'Padrão';
-    // Define o número (0 padrão)
-    @Input() number: Number = 0;
-    // Define o texto que ficará em baixo
-    @Input() sub: String = 'Padrão';
+  @Input() label: string = 'Padrão';
+  @Input() number: number = 0;
+  @Input() sub: string = 'Padrão';
 
 }

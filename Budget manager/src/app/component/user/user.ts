@@ -5,6 +5,7 @@ import { Auth, user, signOut } from '@angular/fire/auth';
 import { Firestore, doc, docData } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { errorCode } from '../../utils/error-code';
 
 interface UserData {
   nome?: string;
@@ -12,6 +13,7 @@ interface UserData {
   uid?: string;
 }
 
+/** Exibe o perfil autenticado e oferece encerramento da sessão. */
 @Component({
   selector: 'app-user',
   standalone: true,
@@ -34,12 +36,13 @@ export class HeaderComponent {
     })
   );
 
+  /** Encerra a sessão Firebase e redireciona à tela de login. */
   async logout(): Promise<void> {
     try {
       await signOut(this.auth);
       this.router.navigate(['/login']);
     } catch (error) {
-      console.error('Erro ao terminar sessão:', error);
+      console.error('Erro ao terminar sessão:', errorCode(error));
     }
   }
 }

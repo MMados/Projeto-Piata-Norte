@@ -1,16 +1,32 @@
 import { TestBed } from "@angular/core/testing";
-import { CanActivateFn } from "@angular/router";
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from "@angular/router";
+import { Observable, firstValueFrom } from "rxjs";
+import { firebaseTestProviders } from '../testing/firebase-test-providers';
 import { authGuard } from "./auth-guard";
 
 describe("authGuard", () => {
-  const executeGuard: CanActivateFn = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => authGuard(...guardParameters));
-
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideRouter([]), ...firebaseTestProviders],
+    });
   });
 
-  it("should be created", () => {
-    expect(executeGuard).toBeTruthy();
+  it("redirects users without a session to the login page", async () => {
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+    );
+    const guardResult = await firstValueFrom(result as Observable<boolean | UrlTree>);
+    const router = TestBed.inject(Router);
+
+    expect(guardResult instanceof UrlTree).toBe(true);
+    if (guardResult instanceof UrlTree) {
+      expect(router.serializeUrl(guardResult)).toBe("/login");
+    }
   });
 });

@@ -10,12 +10,15 @@ import {
   deleteDoc,
   getDoc,
   getDocs,
+  query,
   updateDoc,
+  where,
   writeBatch,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Orcamento, OrcamentoFormDraft } from '../models/orcamento.model';
 
+/** Encapsula leitura e gravação de orçamentos e rascunhos de edição. */
 @Injectable({
   providedIn: 'root',
 })
@@ -26,6 +29,7 @@ export class OrcamentoService {
   private readonly orcamentosRef = collection(this.firestore, 'orcamentos');
   private readonly rascunhosFormulario = new Map<string, OrcamentoFormDraft>();
 
+  /** Mantém temporariamente as alterações não salvas enquanto a prévia está aberta. */
   guardarRascunho(id: string, rascunho: OrcamentoFormDraft): void {
     this.rascunhosFormulario.set(id, rascunho);
   }
@@ -116,10 +120,18 @@ export class OrcamentoService {
     return null;
   }
 
+  /** Observa a coleção de orçamentos usada pelo dashboard. */
   obterOrcamentos(): Observable<Orcamento[]> {
     return collectionData(this.orcamentosRef, { idField: 'id_orcamento' }) as Observable<Orcamento[]>;
   }
 
+  /** Observa apenas os orçamentos exibidos como ativos no menu lateral. */
+  obterOrcamentosEmProducao(): Observable<Orcamento[]> {
+    const consulta = query(this.orcamentosRef, where('status', '==', 'Em produção'));
+    return collectionData(consulta, { idField: 'id_orcamento' }) as Observable<Orcamento[]>;
+  }
+
+  /** Observa um documento específico durante a edição ou pré-visualização. */
   obterOrcamento(id: string): Observable<Orcamento | undefined> {
     const orcamentoRef = doc(this.firestore, `orcamentos/${id}`);
     return docData(orcamentoRef, { idField: 'id_orcamento' }) as Observable<Orcamento | undefined>;
@@ -140,13 +152,14 @@ export class OrcamentoService {
       if (typeof nomeCadastrado === 'string' && nomeCadastrado.trim()) {
         return nomeCadastrado.trim();
       }
-    } catch (erro) {
-      console.warn('Não foi possível consultar o nome do usuário no Firestore:', erro);
+    } catch {
+      console.warn('Não foi possível consultar o nome do usuário no Firestore.');
     }
 
     return usuarioAtual.displayName?.trim() || usuarioAtual.email || 'Usuário não identificado';
   }
 
+  /** Cria um documento e registra o usuário que realizou a operação. */
   async criarOrcamento(orcamento: Orcamento) {
     return runInInjectionContext(this.injector, async () => {
       const editor = await this.obterNomeEditor();
@@ -154,12 +167,24 @@ export class OrcamentoService {
     });
   }
 
+  /** Atualiza os campos fornecidos, renova a data e registra o editor atual. */
   async atualizarOrcamento(id: string, orcamento: Partial<Omit<Orcamento, 'id_orcamento'>>) {
     return runInInjectionContext(this.injector, async () => {
       const orcamentoRef = doc(this.firestore, `orcamentos/${id}`);
       const editor = await this.obterNomeEditor();
-      return updateDoc(orcamentoRef, { ...orcamento, editor });
+      return updateDoc(orcamentoRef, {
+        ...orcamento,
+        data_orcamento: this.hojeIso(),
+        editor,
+      });
     });
+  }
+
+  private hojeIso(): string {
+    const data = new Date();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${data.getFullYear()}-${mes}-${dia}`;
   }
 
   /** Exclui um orçamento pelo ID mantendo o contexto de injeção ativo. */

@@ -2,7 +2,9 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { errorCode } from '../../utils/error-code';
 
+/** Tela pública de autenticação e recuperação de acesso. */
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -11,6 +13,9 @@ import { AuthService } from '../../services/auth';
   styleUrl: './login.css'
 })
 export class Login {
+  private readonly mensagemRedefinicaoGenerica =
+    'Se o e-mail estiver cadastrado, enviaremos as instruções para redefinição.';
+
   private authService = inject(AuthService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
@@ -29,6 +34,7 @@ export class Login {
     this.senhaVisivel = !this.senhaVisivel;
   }
 
+  /** Valida os campos e abre o dashboard após autenticação bem-sucedida. */
   async validarLogin() {
     if (this.formularioLogin.invalid) {
       this.formularioLogin.markAllAsTouched();
@@ -49,8 +55,8 @@ export class Login {
       setTimeout(() => {
         this.router.navigate(['/dashboard']);
       }, 500);
-    } catch (error: any) {
-      console.error('Erro de autenticação no Firebase:', error);
+    } catch (error: unknown) {
+      console.error('Erro de autenticação no Firebase:', errorCode(error));
       this.tratarErroFirebase(error);
     } finally {
       this.carregando = false;
@@ -58,7 +64,7 @@ export class Login {
     }
   }
 
-  // Ação ao clicar em "Esqueci minha senha"
+  /** Solicita a recuperação de senha para o e-mail informado. */
   async esqueciMinhaSenha() {
     const emailControl = this.formularioLogin.get('email');
 
@@ -75,14 +81,15 @@ export class Login {
 
     try {
       await this.authService.redefinirSenha(emailControl.value);
-      this.mensagemSucesso = 'E-mail de redefinição de senha enviado! Verifique sua caixa de entrada.';
-    } catch (error: any) {
-      console.error('Erro ao enviar e-mail de redefinição:', error);
-      const codigo = error?.code || '';
-      if (codigo.includes('user-not-found')) {
-        this.mensagemErro = 'Nenhuma conta encontrada com este e-mail.';
+      this.mensagemSucesso = this.mensagemRedefinicaoGenerica;
+    } catch (error: unknown) {
+      const codigo = errorCode(error);
+      if (codigo === 'auth/user-not-found') {
+        this.mensagemSucesso = this.mensagemRedefinicaoGenerica;
       } else {
-        this.mensagemErro = 'Erro ao enviar e-mail de redefinição. Verifique o e-mail digitado.';
+        console.error('Erro ao enviar e-mail de redefinição:', codigo);
+        this.mensagemErro =
+          'Não foi possível solicitar a redefinição agora. Tente novamente mais tarde.';
       }
     } finally {
       this.carregando = false;
@@ -90,8 +97,8 @@ export class Login {
     }
   }
 
-  private tratarErroFirebase(error: any) {
-    const codigo = error?.code || error?.message || String(error);
+  private tratarErroFirebase(error: unknown): void {
+    const codigo = errorCode(error);
 
     if (
       codigo.includes('invalid-credential') ||
@@ -109,4 +116,5 @@ export class Login {
       this.mensagemErro = 'Erro ao conectar ao Firebase. Verifique se o e-mail está registado na consola.';
     }
   }
+
 }

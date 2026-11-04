@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MenuTop } from '../../component/menu-top/menu-top';
 import { ItemOrcamento, Orcamento, OrcamentoFormDraft } from '../../models/orcamento.model';
 import { OrcamentoService } from '../../services/orcamento.service';
+import { errorCode } from '../../utils/error-code';
 
 function numero(valor: string | number | null | undefined): number {
   if (typeof valor === 'number') return valor;
@@ -22,6 +23,7 @@ function numero(valor: string | number | null | undefined): number {
 const arredondar = (n: number, casas = 2) => Math.round(n * 10 ** casas) / 10 ** casas;
 const SO_NUMERO = /^\s*\d+([.,]\d+)?\s*$/;
 
+/** Formulário único para criação e edição de orçamentos e seus itens. */
 @Component({
   imports: [MenuTop, RouterLink, ReactiveFormsModule],
   selector: 'app-formulario',
@@ -79,7 +81,7 @@ export class Formulario {
           this.changeDetector.detectChanges();
         },
         error: (erro) => {
-          console.error('Erro ao carregar o orçamento:', erro);
+          console.error('Erro ao carregar o orçamento:', errorCode(erro));
           this.erro = 'Não foi possível carregar o orçamento. Tente novamente.';
           this.carregando = false;
           this.changeDetector.detectChanges();
@@ -114,7 +116,7 @@ export class Formulario {
       await this.service.atualizarOrcamento(this.orcamentoId, { status: novoStatus });
       this.orcamentoOriginal = { ...this.orcamentoOriginal, status: novoStatus };
     } catch (erro) {
-      console.error('Erro ao alterar o status do orçamento:', erro);
+      console.error('Erro ao alterar o status do orçamento:', errorCode(erro));
       this.erro = 'Não foi possível alterar o status do orçamento. Tente novamente.';
     } finally {
       this.salvandoStatus = false;
@@ -253,7 +255,7 @@ export class Formulario {
 
     return {
       nome_projeto: v.projeto.trim(),
-      data_orcamento: this.orcamentoOriginal?.data_orcamento ?? this.hojeIso(),
+      data_orcamento: this.hojeIso(),
       cliente: v.cliente.trim(),
       prazo_de_entrega: v.prazo.trim(),
       valor_total: arredondar(itens.reduce((soma, item) => soma + item.valor, 0)),
@@ -264,6 +266,7 @@ export class Formulario {
     };
   }
 
+  /** Valida os campos e cria ou atualiza o documento no Firestore. */
   async salvar(): Promise<void> {
     this.erro = '';
 
@@ -289,7 +292,7 @@ export class Formulario {
       }
       await this.router.navigate(['/dashboard']);
     } catch (erro) {
-      console.error('Erro ao salvar o orçamento:', erro);
+      console.error('Erro ao salvar o orçamento:', errorCode(erro));
       this.erro = 'Não foi possível salvar o orçamento. Tente novamente.';
     } finally {
       this.salvando = false;

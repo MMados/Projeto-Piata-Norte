@@ -8,6 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import emailjs from '@emailjs/browser';
+import { environment } from '../../../environments/environment';
 
 export interface Contato {
   nome: string;
@@ -130,22 +131,22 @@ export class ContactForm {
 
     try {
       await emailjs.send(
-        'service_hcr8z5c',   // ID do serviço criado no EmailJS
-        'template_fv1mixi',  // ID do modelo de e-mail no EmailJS
+        environment.emailjs.serviceId,
+        environment.emailjs.templateId,
         {
           nome: dadosContato.nome,
           email: dadosContato.email,
           telefone: dadosContato.telefone,
           mensagem: dadosContato.mensagem,
         },
-        'mcZsMTL11qihmg_S8'    // Sua chave pública do EmailJS
+        environment.emailjs.publicKey,
       );
 
       this.enviar.emit(dadosContato);
       this.form.reset();
       this.sucesso.set(true);
-    } catch (err) {
-      console.error('Erro ao enviar e-mail via EmailJS:', err);
+    } catch {
+      console.error('Erro ao enviar e-mail via EmailJS.');
       this.erro.set('Não foi possível enviar no momento. Tente novamente ou entre em contato pelo WhatsApp.');
     } finally {
       this.enviando.set(false);

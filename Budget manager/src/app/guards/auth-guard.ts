@@ -9,12 +9,8 @@ export const authGuard: CanActivateFn = () => {
 
   return user(auth).pipe(
     take(1),
-    map(currentUser => {
-      if (currentUser) {
-        return true; // Sessão ativa: permite o acesso
-      }
-      // Sem sessão: bloqueia e redireciona para a página de login
-      return router.createUrlTree(['/**']);
-    })
+    map((currentUser) =>
+      currentUser ? true : router.createUrlTree(['/login']),
+    ),
   );
 };

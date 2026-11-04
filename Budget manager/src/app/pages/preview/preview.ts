@@ -42,6 +42,7 @@ function ehRascunho(valor: unknown): valor is OrcamentoFormDraft {
   return typeof rascunho.projeto === 'string' && Array.isArray(rascunho.itens);
 }
 
+/** Exibe um orçamento consultado ou um rascunho antes da impressão. */
 @Component({
   imports: [MenuTop],
   selector: 'app-preview',
@@ -77,6 +78,7 @@ export class Preview {
     { initialValue: null },
   );
 
+  /** Guarda o rascunho da edição e retorna à tela de origem. */
   async voltar(): Promise<void> {
     const orcamento = this.orcamentoSelecionado();
     const id = orcamento?.id_orcamento;
@@ -90,6 +92,7 @@ export class Preview {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(valor ?? 0));
   }
 
+  /** Abre a caixa de impressão do navegador, inclusive para salvar em PDF. */
   imprimir(): void {
     window.print();
   }
