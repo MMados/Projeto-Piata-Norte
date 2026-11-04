@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+/** Apresenta links de contato pré-configurados para WhatsApp. */
 @Component({
   selector: 'app-whatsapp-selector',
   standalone: true,

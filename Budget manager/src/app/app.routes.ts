@@ -1,26 +1,50 @@
 import { Routes } from '@angular/router';
-import { Login } from './pages/login/login';
-import { Cadastro } from './pages/cadastro/cadastro';
-import { Dashboard } from './pages/dashboard/dashboard';
-import { Formulario } from './pages/formulario/formulario';
-import { Preview } from './pages/preview/preview';
-import { NotFound } from './pages/not-found/not-found';
-import { LadingPageComponent } from './pages/lading-page/lading-page';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
   // Rotas públicas
-  { path: '', component: LadingPageComponent },
-  { path: 'login', component: Login },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/lading-page/lading-page').then((module) => module.LadingPageComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login').then((module) => module.Login),
+  },
 
   // Rotas protegidas (bloqueadas para quem não está logado)
-  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
-  { path: 'orcamento', component: Formulario, canActivate: [authGuard] },
-  { path: 'orcamento/:id', component: Formulario, canActivate: [authGuard] },
-  { path: 'preview', component: Preview, canActivate: [authGuard] },
-  { path: 'cadastro', component: Cadastro, canActivate: [authGuard]  },
-
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/dashboard').then((module) => module.Dashboard),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'orcamento',
+    loadComponent: () =>
+      import('./pages/formulario/formulario').then((module) => module.Formulario),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'orcamento/:id',
+    loadComponent: () =>
+      import('./pages/formulario/formulario').then((module) => module.Formulario),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'preview',
+    loadComponent: () => import('./pages/preview/preview').then((module) => module.Preview),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'cadastro',
+    loadComponent: () => import('./pages/cadastro/cadastro').then((module) => module.Cadastro),
+    canActivate: [authGuard],
+  },
 
   // Rota de erro / não encontrada
-  { path: '**', component: NotFound },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found').then((module) => module.NotFound),
+  },
 ];

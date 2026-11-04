@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import {
   Firestore,
@@ -10,21 +10,26 @@ import {
   deleteDoc,
   getDoc,
   getDocs,
+  query,
   updateDoc,
+  where,
   writeBatch,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Orcamento, OrcamentoFormDraft } from '../models/orcamento.model';
 
+/** Encapsula leitura e gravação de orçamentos e rascunhos de edição. */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrcamentoService {
-  private firestore: Firestore = inject(Firestore);
-  private auth: Auth = inject(Auth);
-  private orcamentosRef = collection(this.firestore, 'orcamentos');
+  private readonly firestore: Firestore = inject(Firestore);
+  private readonly auth: Auth = inject(Auth);
+  private readonly injector = inject(EnvironmentInjector);
+  private readonly orcamentosRef = collection(this.firestore, 'orcamentos');
   private readonly rascunhosFormulario = new Map<string, OrcamentoFormDraft>();
 
+  /** Mantém temporariamente as alterações não salvas enquanto a prévia está aberta. */
   guardarRascunho(id: string, rascunho: OrcamentoFormDraft): void {
     this.rascunhosFormulario.set(id, rascunho);
   }
@@ -43,36 +48,32 @@ export class OrcamentoService {
 
   /**
    * Exclui orçamentos cuja data de criação seja anterior a seis meses.
-   * Esta rotina é chamada quando o dashboard é aberto; não depende de
-   * Cloud Functions nem de uma tarefa agendada no Firebase.
-   *
-   * Datas inválidas ou ausentes são ignoradas para evitar exclusões indevidas.
    */
   async eliminarOrcamentosAntigos(): Promise<number> {
-    const dataLimite = this.obterDataLimiteSeisMeses();
-    const consulta = await getDocs(this.orcamentosRef);
+    return runInInjectionContext(this.injector, async () => {
+      const dataLimite = this.obterDataLimiteSeisMeses();
+      const consulta = await getDocs(this.orcamentosRef);
 
-    const expirados = consulta.docs.filter((documento) => {
-      const dataIso = this.converterDataParaIso(documento.data()['data_orcamento']);
-      return dataIso !== null && dataIso < dataLimite;
-    });
+      const expirados = consulta.docs.filter((documento) => {
+        const dataIso = this.converterDataParaIso(documento.data()['data_orcamento']);
+        return dataIso !== null && dataIso < dataLimite;
+      });
 
-    // O Firestore permite até 500 operações por lote. Usamos 450 por segurança.
-    for (let inicio = 0; inicio < expirados.length; inicio += 450) {
-      const lote = writeBatch(this.firestore);
-      const grupo = expirados.slice(inicio, inicio + 450);
+      for (let inicio = 0; inicio < expirados.length; inicio += 450) {
+        const lote = writeBatch(this.firestore);
+        const grupo = expirados.slice(inicio, inicio + 450);
 
-      for (const documento of grupo) {
-        lote.delete(documento.ref);
+        for (const documento of grupo) {
+          lote.delete(documento.ref);
+        }
+
+        await lote.commit();
       }
 
-      await lote.commit();
-    }
-
-    return expirados.length;
+      return expirados.length;
+    });
   }
 
-  /** Retorna a data de seis meses atrás no formato AAAA-MM-DD. */
   private obterDataLimiteSeisMeses(): string {
     const hoje = new Date();
     const mesAlvo = hoje.getMonth() - 6;
@@ -89,10 +90,6 @@ export class OrcamentoService {
     return `${ano}-${mes}-${dia}`;
   }
 
-  /**
-   * Normaliza as datas usadas pelo projeto. O formato AAAA-MM-DD é preservado
-   * como data de calendário; Timestamp e datas ISO completas são convertidos.
-   */
   private converterDataParaIso(valor: unknown): string | null {
     if (typeof valor === 'string') {
       const texto = valor.trim();
@@ -123,21 +120,23 @@ export class OrcamentoService {
     return null;
   }
 
-  // Consulta todos os orçamentos no Firestore em tempo real
+  /** Observa a coleção de orçamentos usada pelo dashboard. */
   obterOrcamentos(): Observable<Orcamento[]> {
     return collectionData(this.orcamentosRef, { idField: 'id_orcamento' }) as Observable<Orcamento[]>;
   }
 
+  /** Observa apenas os orçamentos exibidos como ativos no menu lateral. */
+  obterOrcamentosEmProducao(): Observable<Orcamento[]> {
+    const consulta = query(this.orcamentosRef, where('status', '==', 'Em produção'));
+    return collectionData(consulta, { idField: 'id_orcamento' }) as Observable<Orcamento[]>;
+  }
+
+  /** Observa um documento específico durante a edição ou pré-visualização. */
   obterOrcamento(id: string): Observable<Orcamento | undefined> {
     const orcamentoRef = doc(this.firestore, `orcamentos/${id}`);
     return docData(orcamentoRef, { idField: 'id_orcamento' }) as Observable<Orcamento | undefined>;
   }
 
-  /**
-   * Recupera o nome do usuário autenticado para registrar quem realizou
-   * a última alteração do orçamento. O nome cadastrado no Firestore tem
-   * prioridade; displayName e e-mail são alternativas de identificação.
-   */
   private async obterNomeEditor(): Promise<string> {
     const usuarioAtual = this.auth.currentUser;
 
@@ -153,30 +152,46 @@ export class OrcamentoService {
       if (typeof nomeCadastrado === 'string' && nomeCadastrado.trim()) {
         return nomeCadastrado.trim();
       }
-    } catch (erro) {
-      // A identificação ainda pode ser feita pelo perfil do Firebase Auth.
-      console.warn('Não foi possível consultar o nome do usuário no Firestore:', erro);
+    } catch {
+      console.warn('Não foi possível consultar o nome do usuário no Firestore.');
     }
 
     return usuarioAtual.displayName?.trim() || usuarioAtual.email || 'Usuário não identificado';
   }
 
-  // Grava um novo orçamento já identificando quem o cadastrou.
+  /** Cria um documento e registra o usuário que realizou a operação. */
   async criarOrcamento(orcamento: Orcamento) {
-    const editor = await this.obterNomeEditor();
-    return addDoc(this.orcamentosRef, { ...orcamento, editor });
+    return runInInjectionContext(this.injector, async () => {
+      const editor = await this.obterNomeEditor();
+      return addDoc(this.orcamentosRef, { ...orcamento, editor });
+    });
   }
 
-  // Toda atualização registra automaticamente o usuário responsável.
+  /** Atualiza os campos fornecidos, renova a data e registra o editor atual. */
   async atualizarOrcamento(id: string, orcamento: Partial<Omit<Orcamento, 'id_orcamento'>>) {
-    const orcamentoRef = doc(this.firestore, `orcamentos/${id}`);
-    const editor = await this.obterNomeEditor();
-    return updateDoc(orcamentoRef, { ...orcamento, editor });
+    return runInInjectionContext(this.injector, async () => {
+      const orcamentoRef = doc(this.firestore, `orcamentos/${id}`);
+      const editor = await this.obterNomeEditor();
+      return updateDoc(orcamentoRef, {
+        ...orcamento,
+        data_orcamento: this.hojeIso(),
+        editor,
+      });
+    });
   }
 
-  // Remove um orçamento pelo ID
-  eliminarOrcamento(id: string) {
-    const docRef = doc(this.firestore, `orcamentos/${id}`);
-    return deleteDoc(docRef);
+  private hojeIso(): string {
+    const data = new Date();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    return `${data.getFullYear()}-${mes}-${dia}`;
+  }
+
+  /** Exclui um orçamento pelo ID mantendo o contexto de injeção ativo. */
+  async eliminarOrcamento(id: string): Promise<void> {
+    return runInInjectionContext(this.injector, async () => {
+      const docRef = doc(this.firestore, `orcamentos/${id}`);
+      await deleteDoc(docRef);
+    });
   }
 }

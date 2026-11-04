@@ -3,5 +3,5 @@ export interface Usuario {
   email: string;
   nome?: string;
   dataCriacao?: Date | string;
-  ultimoAcesso?: any;
+  ultimoAcesso?: unknown;
 }

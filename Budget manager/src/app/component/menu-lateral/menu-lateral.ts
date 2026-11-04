@@ -1,16 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Firestore, collection, collectionData, query, where } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { OrcamentoService } from '../../services/orcamento.service';
 
-interface Orcamento {
-  id?: string;
-  nomeProjeto?: string;
-  cliente?: string;
-  status?: string;
-}
-
+/** Navegação do painel e resumo de orçamentos em produção. */
 @Component({
   selector: 'app-menu-lateral',
   standalone: true,
@@ -19,14 +12,7 @@ interface Orcamento {
   styleUrl: './menu-lateral.css'
 })
 export class MenuLateralComponent {
-  private firestore = inject(Firestore);
+  private readonly orcamentoService = inject(OrcamentoService);
 
-  // Busca apenas os orçamentos que estão com status 'Em produção'
-  orcamentosEmAndamento$: Observable<Orcamento[]> = collectionData(
-    query(
-      collection(this.firestore, 'orcamentos'),
-      where('status', '==', 'Em produção')
-    ),
-    { idField: 'id' }
-  ) as Observable<Orcamento[]>;
+  readonly orcamentosEmAndamento$ = this.orcamentoService.obterOrcamentosEmProducao();
 }

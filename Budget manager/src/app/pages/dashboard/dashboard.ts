@@ -4,6 +4,7 @@ import {
   DestroyRef,
   HostListener,
   inject,
+  NgZone,
   OnInit,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,9 +15,11 @@ import { CardSummary } from '../../component/card-summary/card-summary';
 import { MenuTop } from '../../component/menu-top/menu-top';
 import { Orcamento } from '../../models/orcamento.model';
 import { OrcamentoService } from '../../services/orcamento.service';
+import { errorCode } from '../../utils/error-code';
 
 type FiltroStatus = 'Todos' | 'Em produção' | 'Finalizados';
 
+/** Página de consulta, busca, paginação e manutenção dos orçamentos. */
 @Component({
   selector: 'app-dashboard',
   imports: [MenuTop, FormsModule, CardSummary, RouterLink],
@@ -28,6 +31,7 @@ export class Dashboard implements OnInit {
   private readonly orcamentoService = inject(OrcamentoService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly zone = inject(NgZone);
 
   listaOrcamentos: Orcamento[] = [];
   carregando = true;
@@ -43,44 +47,42 @@ export class Dashboard implements OnInit {
   excluindo = false;
 
   ngOnInit(): void {
-    // 1. Limpa rascunhos locais
     if (typeof this.orcamentoService.limparRascunhos === 'function') {
       this.orcamentoService.limparRascunhos();
     }
 
-    // 2. Inscreve-se nos orçamentos IMEDIATAMENTE dentro do contexto de injeção
     this.inscreverOrcamentos();
-
-    // 3. Executa a limpeza de orçamentos antigos em segundo plano
     void this.executarLimpezaAntigos();
   }
 
-  /** Inscreve-se no Observable de orçamentos do Firebase no contexto seguro do Angular */
   private inscreverOrcamentos(): void {
     this.orcamentoService
       .obterOrcamentos()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orcamentos) => {
-          this.listaOrcamentos = [...(orcamentos ?? [])].sort(
-            (a, b) =>
-              this.dataEmMilissegundos(b.data_orcamento) -
-              this.dataEmMilissegundos(a.data_orcamento),
-          );
-          this.ajustarPaginaAtual();
-          this.carregando = false;
-          this.changeDetector.detectChanges();
+          this.zone.run(() => {
+            this.listaOrcamentos = [...(orcamentos ?? [])].sort(
+              (a, b) =>
+                this.dataEmMilissegundos(b.data_orcamento) -
+                this.dataEmMilissegundos(a.data_orcamento),
+            );
+            this.ajustarPaginaAtual();
+            this.carregando = false;
+            this.changeDetector.markForCheck();
+          });
         },
         error: (erro) => {
-          console.error('Erro ao carregar os orçamentos:', erro);
-          this.erro = 'Não foi possível carregar os orçamentos. Tente novamente.';
-          this.carregando = false;
-          this.changeDetector.detectChanges();
+          console.error('Erro ao carregar os orçamentos:', errorCode(erro));
+          this.zone.run(() => {
+            this.erro = 'Não foi possível carregar os orçamentos. Tente novamente.';
+            this.carregando = false;
+            this.changeDetector.markForCheck();
+          });
         },
       });
   }
 
-  /** Executa a remoção de orçamentos antigos assincronamente sem bloquear a injeção */
   private async executarLimpezaAntigos(): Promise<void> {
     try {
       if (typeof this.orcamentoService.eliminarOrcamentosAntigos === 'function') {
@@ -90,7 +92,10 @@ export class Dashboard implements OnInit {
         }
       }
     } catch (erro) {
-      console.error('Não foi possível excluir automaticamente os orçamentos antigos:', erro);
+      console.error(
+        'Não foi possível excluir automaticamente os orçamentos antigos:',
+        errorCode(erro),
+      );
     }
   }
 
@@ -165,7 +170,9 @@ export class Dashboard implements OnInit {
   }
 
   private ajustarPaginaAtual(): void {
-    this.paginaAtual = Math.min(this.paginaAtual, this.totalPaginas);
+    if (this.paginaAtual > this.totalPaginas) {
+      this.paginaAtual = Math.max(1, this.totalPaginas);
+    }
   }
 
   statusEmProducao(orcamento: Orcamento): boolean {
@@ -184,6 +191,7 @@ export class Dashboard implements OnInit {
       .toLocaleLowerCase('pt-BR');
   }
 
+  /** Cria uma cópia independente do orçamento selecionado. */
   async duplicarOrcamento(orcamento: Orcamento): Promise<void> {
     this.erro = '';
     this.mensagemAcao = '';
@@ -198,13 +206,19 @@ export class Dashboard implements OnInit {
 
     try {
       await this.orcamentoService.criarOrcamento(copia);
-      this.mensagemAcao = 'Orçamento duplicado com sucesso.';
+      this.zone.run(() => {
+        this.mensagemAcao = 'Orçamento duplicado com sucesso.';
+      });
     } catch (erro) {
-      console.error('Erro ao duplicar o orçamento:', erro);
-      this.erro = 'Não foi possível duplicar o orçamento. Tente novamente.';
+      console.error('Erro ao duplicar o orçamento:', errorCode(erro));
+      this.zone.run(() => {
+        this.erro = 'Não foi possível duplicar o orçamento. Tente novamente.';
+      });
     } finally {
-      this.duplicandoId = null;
-      this.changeDetector.detectChanges();
+      this.zone.run(() => {
+        this.duplicandoId = null;
+        this.changeDetector.markForCheck();
+      });
     }
   }
 
@@ -226,6 +240,7 @@ export class Dashboard implements OnInit {
     if (this.orcamentoParaExcluir) this.cancelarExclusao();
   }
 
+  /** Confirma a exclusão do documento selecionado. */
   async confirmarExclusao(): Promise<void> {
     const id = this.orcamentoParaExcluir?.id_orcamento;
     if (!id) {
@@ -237,24 +252,23 @@ export class Dashboard implements OnInit {
     this.erroExclusao = '';
 
     try {
-      // Tenta chamar o método do serviço de forma compatível
-      const servico = this.orcamentoService as unknown as Record<string, (id: string) => Promise<void>>;
-      if (typeof servico['eliminarOrcamento'] === 'function') {
-        await servico['eliminarOrcamento'](id);
-      } else if (typeof servico['excluirOrcamento'] === 'function') {
-        await servico['excluirOrcamento'](id);
-      } else {
-        throw new Error('Método de exclusão não definido no serviço.');
-      }
+      await this.orcamentoService.eliminarOrcamento(id);
 
-      this.orcamentoParaExcluir = null;
-      this.mensagemAcao = 'Orçamento excluído com sucesso.';
+      this.zone.run(() => {
+        this.orcamentoParaExcluir = null;
+        this.mensagemAcao = 'Orçamento excluído com sucesso.';
+        this.ajustarPaginaAtual();
+      });
     } catch (erro) {
-      console.error('Erro ao excluir o orçamento:', erro);
-      this.erroExclusao = 'Não foi possível excluir o orçamento. Tente novamente.';
+      console.error('Erro ao excluir o orçamento:', errorCode(erro));
+      this.zone.run(() => {
+        this.erroExclusao = 'Não foi possível excluir o orçamento. Tente novamente.';
+      });
     } finally {
-      this.excluindo = false;
-      this.changeDetector.detectChanges();
+      this.zone.run(() => {
+        this.excluindo = false;
+        this.changeDetector.markForCheck();
+      });
     }
   }
 
