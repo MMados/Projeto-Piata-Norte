@@ -191,9 +191,17 @@ export class Formulario {
   }
 
   subtotal(indice: number): number {
-    const v = this.itens.at(indice).getRawValue();
-    return numero(v.madeira) + numero(v.insumos) + numero(v.maoDeObra);
-  }
+  const v = this.itens.at(indice).getRawValue();
+
+  const comprimento = numero(v.comprimento);
+  const altura = numero(v.altura);
+  const profundidade = numero(v.profundidade);
+  const volume = comprimento * altura * profundidade;
+  const madeira = volume * numero(v.madeira);
+  const insumos = numero(v.insumos);
+  const maoDeObra = numero(v.maoDeObra);
+  return arredondar(madeira + insumos + maoDeObra);
+}
 
   brl(valor: number): string {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
@@ -223,7 +231,8 @@ export class Formulario {
       const altura = numero(i.altura);
       const profundidade = numero(i.profundidade);
       const volume = largura * altura * profundidade;
-      const madeira = numero(i.madeira);
+      const precoMadeiraM3 = numero(i.madeira);
+      const madeira = volume * precoMadeiraM3;
       const insumos = numero(i.insumos);
       const maoDeObra = numero(i.maoDeObra);
       const nome = i.nome.trim();
