@@ -69,3 +69,7 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Limpeza automática de orçamentos antigos
+
+Ao abrir o dashboard, o aplicativo verifica a coleção `orcamentos` e exclui os documentos cuja `data_orcamento` seja anterior a seis meses. A verificação usa o próprio AngularFire/Firestore do aplicativo e não exige Cloud Functions, Cloud Scheduler ou configuração de plano Blaze. A limpeza depende das regras de segurança do Firestore permitirem a exclusão pelo usuário autenticado e só ocorre quando o dashboard é aberto.

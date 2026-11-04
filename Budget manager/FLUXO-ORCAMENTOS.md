@@ -57,7 +57,7 @@ No modo de criação:
 3. Antes de salvar, os valores monetários e as medidas são convertidos para números. A entrada aceita formatos como `2700`, `2.700` e `2.700,50`.
 4. Para cada móvel, o formulário calcula o volume (`largura × altura × profundidade`), o custo por volume e o total do móvel (`madeira + insumos + mão de obra`).
 5. O formulário monta o objeto `Orcamento`, define a data atual no formato `AAAA-MM-DD` e usa **Em produção** como status inicial.
-6. `OrcamentoService.criarOrcamento()` usa `addDoc()` para criar um documento em `orcamentos`. O Firestore gera o ID do documento.
+6. `OrcamentoService.criarOrcamento()` identifica o usuário autenticado e grava seu nome no campo `editor` junto com os dados do orçamento. Em seguida, usa `addDoc()` para criar um documento em `orcamentos`; o Firestore gera o ID do documento.
 7. Após a gravação, a aplicação navega para `/dashboard`.
 
 Se a validação falhar, o formulário mostra uma mensagem e marca os campos inválidos. Se a gravação falhar, o erro é registrado no console e uma mensagem é exibida no formulário.
@@ -88,14 +88,14 @@ Ao acessar `/orcamento/:id`:
 4. Os dados dos móveis são reconstruídos a partir dos campos armazenados em `itens`. A descrição salva pode combinar nome e descrição; no carregamento, o formulário separa esses valores pelo primeiro `: `.
 5. O usuário altera os campos necessários e seleciona **Atualizar orçamento**.
 6. O formulário recalcula os itens e o total, preserva a data e o status originais e chama `OrcamentoService.atualizarOrcamento(id, dados)`.
-7. O serviço usa `updateDoc()` no documento existente. Portanto, a edição não cria outro orçamento.
+7. O serviço identifica o usuário autenticado, atualiza o campo `editor` com seu nome e usa `updateDoc()` no documento existente. Portanto, a edição não cria outro orçamento.
 8. Após a atualização, a aplicação volta para `/dashboard`, cuja lista recebe os dados atualizados.
 
 Na edição também é possível alterar o status do projeto:
 
 - Para um orçamento **Em produção**, o botão **Finalizar projeto** atualiza imediatamente o status para **Finalizado**.
 - Para um orçamento **Finalizado**, o botão **Voltar para produção** restaura o status **Em produção**.
-- A alteração usa `atualizarOrcamento(id, { status })`, sem criar documento nem sobrescrever os demais campos. Enquanto a gravação está em andamento, o botão fica desabilitado. Se houver erro, o status permanece como estava e uma mensagem é exibida.
+- A alteração usa `atualizarOrcamento(id, { status })`, sem criar documento nem sobrescrever os demais campos. O serviço também atualiza `editor` com o nome de quem alterou o status. Enquanto a gravação está em andamento, o botão fica desabilitado. Se houver erro, o status permanece como estava e uma mensagem é exibida.
 
 Se o documento não existir ou não puder ser carregado, a tela informa o problema. Se a atualização falhar, permanece no formulário e apresenta uma mensagem de erro.
 
@@ -114,15 +114,15 @@ Se o documento não existir ou não puder ser carregado, a tela informa o proble
 |---|---|---|
 | `obterOrcamentos()` | `collectionData()` | Lista e observa todos os orçamentos |
 | `obterOrcamento(id)` | `docData()` | Observa um orçamento para edição |
-| `criarOrcamento(orcamento)` | `addDoc()` | Insere um documento novo |
-| `atualizarOrcamento(id, dados)` | `updateDoc()` | Atualiza o documento selecionado |
+| `criarOrcamento(orcamento)` | `addDoc()` | Insere um documento novo e registra o criador no campo `editor` |
+| `atualizarOrcamento(id, dados)` | `updateDoc()` | Atualiza o documento e registra o último editor |
 | `eliminarOrcamento(id)` | `deleteDoc()` | Remove um documento |
 
 ## 7. Campos opcionais e observações
 
 - Documentos antigos podem não conter `pagamento`; nesse caso, o campo aparece vazio na edição.
 - `id_orcamento` é adicionado à resposta da consulta a partir do ID do documento. Não é necessário armazená-lo manualmente.
-- O modelo não tem um campo de editor; por isso, o dashboard exibe `—` nessa coluna.
+- O modelo possui o campo opcional `editor`. O serviço consulta o nome do usuário autenticado em `users/{uid}` e o grava ao criar ou atualizar um orçamento. Caso o nome não esteja disponível, usa o nome de exibição do Firebase Auth ou o e-mail. O dashboard mostra esse valor na coluna **NOME DO EDITOR**; documentos antigos sem o campo continuam exibindo `—` até serem atualizados.
 - O status inicial de novos documentos é **Em produção**. Na edição, o usuário pode alternar entre **Em produção** e **Finalizado**.
 - A edição preserva a data original do orçamento, em vez de substituí-la pela data em que o usuário fez a alteração.
 - O total e os valores por móvel são calculados a partir dos campos do formulário, não de valores fixos na tela.
@@ -156,10 +156,22 @@ As ações de linha usam o mesmo estilo tipográfico e de link, com a exclusão 
 - `src/app/app.routes.ts`: rotas de criação e edição.
 - `src/app/pages/formulario/formulario.ts` e `formulario.html`: formulário, validação, carregamento, cálculos e salvamento.
 - `src/app/pages/dashboard/dashboard.ts`, `dashboard.html` e `dashboard.css`: leitura, apresentação, navegação para edição, duplicação e confirmação de exclusão.
-- `src/app/services/orcamento.ts`: operações no Firestore.
+- `src/app/services/orcamento.service.ts`: operações no Firestore e registro automático do último editor.
 - `src/app/models/orcamento.model.ts`: tipos dos documentos e itens.
 - `package.json` e `package-lock.json`: versões das dependências.
 
 ## Validação realizada
 
 O build de desenvolvimento Angular foi executado com sucesso. As rotas de criação e edição foram verificadas no navegador; a tela de edição carregou um documento existente e exibiu os campos e os móveis correspondentes. Os testes unitários não foram executados porque o pacote `vitest` não estava disponível no ambiente de validação.
+
+## 9. Exclusão automática de orçamentos antigos
+
+A limpeza acontece no próprio aplicativo quando um usuário autenticado abre o dashboard. Não utiliza Cloud Functions, Cloud Scheduler ou plano Blaze.
+
+1. `Dashboard` chama `OrcamentoService.eliminarOrcamentosAntigos()` antes de iniciar a listagem em tempo real.
+2. O serviço consulta os documentos da coleção `orcamentos` e calcula a data-limite de seis meses atrás.
+3. Orçamentos cuja `data_orcamento` seja anterior à data-limite são excluídos em lotes do Firestore. A data do orçamento é usada como referência; alterações posteriores não reiniciam o prazo.
+4. Datas ausentes ou inválidas são ignoradas para evitar apagar registros sem uma data confiável.
+5. Se a exclusão falhar (por exemplo, por falta de permissão de exclusão nas regras do Firestore), o erro é registrado no console, mas o dashboard continua carregando.
+
+**Limitação:** a limpeza só é executada quando alguém abre o dashboard. Se ninguém acessar o sistema, os documentos antigos permanecem no Firestore até a próxima abertura. Como a operação é feita pelo navegador, as regras de segurança do Firestore precisam permitir que o usuário autenticado exclua os documentos vencidos. A limpeza considera a coleção inteira `orcamentos`, não apenas os registros visíveis na página atual.

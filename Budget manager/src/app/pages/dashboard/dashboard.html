@@ -87,7 +87,7 @@
                 }
             </div>
 
-            <div class="col-editor">—</div>
+            <div class="col-editor">{{ item.editor || '—' }}</div>
 
             <div class="col-acoes">
                 <button type="button" class="btn-visualizar" [routerLink]="['/preview']"

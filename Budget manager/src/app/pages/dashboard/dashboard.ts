@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, HostListener, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -20,6 +20,7 @@ export class Dashboard {
   readonly itensPorPagina = 10;
   private readonly orcamentoService = inject(OrcamentoService);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   listaOrcamentos: Orcamento[] = [];
   carregando = true;
@@ -36,25 +37,40 @@ export class Dashboard {
 
   constructor() {
     this.orcamentoService.limparRascunhos();
+    void this.carregarOrcamentos();
+  }
+
+  /** Limpa os orçamentos vencidos ao entrar no dashboard e depois carrega a lista. */
+  private async carregarOrcamentos(): Promise<void> {
+    try {
+      const quantidadeExcluida = await this.orcamentoService.eliminarOrcamentosAntigos();
+      if (quantidadeExcluida > 0) {
+        console.info(`${quantidadeExcluida} orçamento(s) com mais de seis meses foram excluídos.`);
+      }
+    } catch (erro) {
+      // Uma falha na limpeza não deve impedir o acesso ao dashboard.
+      console.error('Não foi possível excluir automaticamente os orçamentos antigos:', erro);
+    }
+
     this.orcamentoService
       .obterOrcamentos()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (orcamentos) => {
-        this.listaOrcamentos = [...orcamentos].sort(
-          (a, b) =>
-            this.dataEmMilissegundos(b.data_orcamento) -
-            this.dataEmMilissegundos(a.data_orcamento),
-        );
-        this.ajustarPaginaAtual();
-        this.carregando = false;
-        this.changeDetector.detectChanges();
+          this.listaOrcamentos = [...orcamentos].sort(
+            (a, b) =>
+              this.dataEmMilissegundos(b.data_orcamento) -
+              this.dataEmMilissegundos(a.data_orcamento),
+          );
+          this.ajustarPaginaAtual();
+          this.carregando = false;
+          this.changeDetector.detectChanges();
         },
         error: (erro) => {
-        console.error('Erro ao carregar os orçamentos:', erro);
-        this.erro = 'Não foi possível carregar os orçamentos. Tente novamente.';
-        this.carregando = false;
-        this.changeDetector.detectChanges();
+          console.error('Erro ao carregar os orçamentos:', erro);
+          this.erro = 'Não foi possível carregar os orçamentos. Tente novamente.';
+          this.carregando = false;
+          this.changeDetector.detectChanges();
         },
       });
   }
